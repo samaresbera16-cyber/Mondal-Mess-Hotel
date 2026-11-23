@@ -1,0 +1,987 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mondal Mess & Hotel</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+header {
+    background: #14532d;
+    color: white;
+    padding: 18px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+header h1 {
+    font-size: 24px;
+}
+
+.container {
+    width: 95%;
+    max-width: 1100px;
+    margin: 25px auto;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px #00000010;
+}
+
+h2 {
+    color: #14532d;
+    margin-bottom: 18px;
+}
+
+h3 {
+    margin-bottom: 10px;
+}
+
+input, select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    margin: 7px 0 15px;
+    font-size: 15px;
+}
+
+button {
+    padding: 11px 16px;
+    border: none;
+    border-radius: 7px;
+    background: #166534;
+    color: white;
+    cursor: pointer;
+    margin: 4px;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #15803d;
+}
+
+.danger {
+    background: #dc2626;
+}
+
+.danger:hover {
+    background: #b91c1c;
+}
+
+.secondary {
+    background: #475569;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: #ecfdf5;
+    border-left: 5px solid #16a34a;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.stat p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.stat h3 {
+    color: #14532d;
+    font-size: 25px;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+th {
+    background: #14532d;
+    color: white;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.message {
+    color: #dc2626;
+    margin: 10px 0;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #14532d;
+    color: white;
+    margin-top: 30px;
+}
+
+@media(max-width:600px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 21px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🍽 Mondal Mess & Hotel</h1>
+    <div>
+        <span id="userLabel"></span>
+        <button id="logoutBtn" class="danger hidden" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginPage" class="card">
+    <h2>Login</h2>
+
+    <label>Mobile Number</label>
+    <input id="loginMobile" maxlength="10" placeholder="Enter mobile number">
+
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Enter password">
+
+    <button onclick="login()">Login</button>
+    <button class="secondary" onclick="showRegister()">Customer Register</button>
+
+    <p id="loginMessage" class="message"></p>
+
+    <hr style="margin:20px 0">
+
+    <p><b>Demo Admin Login</b></p>
+    <p>Mobile: 9999999999</p>
+    <p>Password: admin123</p>
+    <button onclick="fillAdmin()">Fill Admin Login</button>
+</div>
+
+<!-- REGISTER -->
+<div id="registerPage" class="card hidden">
+    <h2>Customer Registration</h2>
+
+    <label>Full Name</label>
+    <input id="regName" placeholder="Enter your name">
+
+    <label>Mobile Number</label>
+    <input id="regMobile" maxlength="10" placeholder="10 digit mobile">
+
+    <label>Room Number</label>
+    <input id="regRoom" placeholder="Room number">
+
+    <label>Password</label>
+    <input id="regPassword" type="password" placeholder="Create password">
+
+    <button onclick="registerCustomer()">Register</button>
+    <button class="secondary" onclick="showLogin()">Back to Login</button>
+
+    <p id="registerMessage" class="message"></p>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminPage" class="hidden">
+
+    <div class="card">
+        <h2>Admin Dashboard</h2>
+        <p>Welcome, Hotel Admin</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <p>Total Customers</p>
+            <h3 id="totalCustomers">0</h3>
+        </div>
+
+        <div class="stat">
+            <p>Total Monthly Meals</p>
+            <h3 id="totalMeals">0</h3>
+        </div>
+
+        <div class="stat">
+            <p>Total Monthly Bill</p>
+            <h3 id="totalBill">₹0</h3>
+        </div>
+
+        <div class="stat">
+            <p>Total Due</p>
+            <h3 id="totalDue">₹0</h3>
+        </div>
+    </div>
+
+    <!-- MEAL TYPES -->
+    <div class="card">
+        <h2>Manage Meal Types & Price</h2>
+
+        <label>Meal Name</label>
+        <input id="mealName" placeholder="Roti + Sabji">
+
+        <label>Price per Plate (₹)</label>
+        <input id="mealPrice" type="number" min="1" placeholder="7">
+
+        <button onclick="addMealType()">Add Meal</button>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Meal</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="mealTypeTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ADMIN ADD MEAL -->
+    <div class="card">
+        <h2>Add Customer Meal</h2>
+
+        <label>Customer</label>
+        <select id="adminCustomer"></select>
+
+        <label>Meal Type</label>
+        <select id="adminMeal"></select>
+
+        <label>Date</label>
+        <input type="date" id="adminDate">
+
+        <label>Quantity (Plate)</label>
+        <input type="number" id="adminQty" value="1" min="1">
+
+        <p id="adminPricePreview">Total: ₹0</p>
+
+        <button onclick="adminAddMeal()">Add Meal</button>
+    </div>
+
+    <!-- CUSTOMER BILL -->
+    <div class="card">
+        <h2>Customers Monthly Bill</h2>
+
+        <label>Select Month</label>
+        <input type="month" id="adminMonth" onchange="renderAdmin()">
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Meals</th>
+                        <th>Bill</th>
+                        <th>Paid</th>
+                        <th>Due</th>
+                        <th>Payment</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ALL MEALS -->
+    <div class="card">
+        <h2>All Meal Records</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Meal</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="allMealsTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOMER DASHBOARD -->
+<div id="customerPage" class="hidden">
+
+    <div class="card">
+        <h2 id="customerWelcome">Customer Dashboard</h2>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <p>My Meals</p>
+            <h3 id="myMealsCount">0</h3>
+        </div>
+
+        <div class="stat">
+            <p>My Bill</p>
+            <h3 id="myBill">₹0</h3>
+        </div>
+
+        <div class="stat">
+            <p>Paid</p>
+            <h3 id="myPaid">₹0</h3>
+        </div>
+
+        <div class="stat">
+            <p>Due</p>
+            <h3 id="myDue">₹0</h3>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Add My Meal</h2>
+
+        <label>Meal Type</label>
+        <select id="customerMeal"></select>
+
+        <label>Date</label>
+        <input type="date" id="customerDate">
+
+        <label>Quantity (Plate)</label>
+        <input type="number" id="customerQty" value="1" min="1">
+
+        <p id="customerPricePreview">Total: ₹0</p>
+
+        <button onclick="customerAddMeal()">Add My Meal</button>
+    </div>
+
+    <div class="card">
+        <h2>My Monthly Statement</h2>
+
+        <label>Select Month</label>
+        <input type="month" id="customerMonth" onchange="renderCustomer()">
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Meal</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="myMealsTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<footer>
+    Mondal Mess & Hotel © 2026
+</footer>
+
+<script>
+const ADMIN = {
+    id: "admin",
+    name: "Hotel Admin",
+    mobile: "9999999999",
+    password: "admin123",
+    role: "admin"
+};
+
+let users = JSON.parse(localStorage.getItem("mmh_users") || "[]");
+let mealTypes = JSON.parse(localStorage.getItem("mmh_mealTypes") || "[]");
+let meals = JSON.parse(localStorage.getItem("mmh_meals") || "[]");
+let payments = JSON.parse(localStorage.getItem("mmh_payments") || "[]");
+
+// Login session is saved in localStorage so refresh does not log out.
+let currentUser = null;
+
+function saveSession() {
+    if (!currentUser) {
+        localStorage.removeItem("mmh_session");
+        return;
+    }
+
+    localStorage.setItem("mmh_session", JSON.stringify({
+        id: currentUser.id,
+        mobile: currentUser.mobile,
+        role: currentUser.role
+    }));
+}
+
+function restoreSession() {
+    try {
+        const savedSession = localStorage.getItem("mmh_session");
+
+        if (!savedSession) {
+            return null;
+        }
+
+        const session = JSON.parse(savedSession);
+
+        if (session.role === "admin" && session.mobile === ADMIN.mobile) {
+            return ADMIN;
+        }
+
+        if (session.role === "customer") {
+            return users.find(
+                user => user.id === session.id && user.mobile === session.mobile
+            ) || null;
+        }
+
+        return null;
+    } catch (error) {
+        console.error("Could not restore login session:", error);
+        localStorage.removeItem("mmh_session");
+        return null;
+    }
+}
+
+currentUser = restoreSession();
+
+if (mealTypes.length === 0) {
+    mealTypes = [
+        { id: 1, name: "Breakfast", price: 25 },
+        { id: 2, name: "Lunch", price: 50 },
+        { id: 3, name: "Dinner", price: 50 },
+        { id: 4, name: "Roti + Sabji", price: 7 }
+    ];
+    saveData();
+}
+
+function saveData() {
+    localStorage.setItem("mmh_users", JSON.stringify(users));
+    localStorage.setItem("mmh_mealTypes", JSON.stringify(mealTypes));
+    localStorage.setItem("mmh_meals", JSON.stringify(meals));
+    localStorage.setItem("mmh_payments", JSON.stringify(payments));
+}
+
+function money(amount) {
+    return "₹" + Number(amount || 0).toFixed(2);
+}
+
+function today() {
+    const d = new Date();
+    return d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
+}
+
+function monthNow() {
+    return today().slice(0, 7);
+}
+
+function showRegister() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("registerPage").classList.remove("hidden");
+}
+
+function showLogin() {
+    document.getElementById("registerPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+}
+
+function fillAdmin() {
+    document.getElementById("loginMobile").value = ADMIN.mobile;
+    document.getElementById("loginPassword").value = ADMIN.password;
+}
+
+function registerCustomer() {
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const room = document.getElementById("regRoom").value.trim();
+    const password = document.getElementById("regPassword").value;
+
+    const msg = document.getElementById("registerMessage");
+
+    if (!name || !mobile || !password) {
+        msg.textContent = "Please fill all required fields.";
+        return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+        msg.textContent = "Enter valid 10 digit mobile number.";
+        return;
+    }
+
+    if (password.length < 6) {
+        msg.textContent = "Password must be at least 6 characters.";
+        return;
+    }
+
+    if (mobile === ADMIN.mobile || users.some(u => u.mobile === mobile)) {
+        msg.textContent = "Mobile number already registered.";
+        return;
+    }
+
+    users.push({
+        id: Date.now(),
+        name,
+        mobile,
+        room,
+        password,
+        role: "customer"
+    });
+
+    saveData();
+    alert("Registration successful!");
+    showLogin();
+}
+
+function login() {
+    const mobile = document.getElementById("loginMobile").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if (mobile === ADMIN.mobile && password === ADMIN.password) {
+        currentUser = ADMIN;
+        saveSession();
+        openDashboard();
+        return;
+    }
+
+    const user = users.find(
+        u => u.mobile === mobile && u.password === password
+    );
+
+    if (!user) {
+        document.getElementById("loginMessage").textContent =
+            "Invalid mobile or password";
+        return;
+    }
+
+    currentUser = user;
+    saveSession();
+    openDashboard();
+}
+
+function openDashboard() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("registerPage").classList.add("hidden");
+
+    document.getElementById("logoutBtn").classList.remove("hidden");
+    document.getElementById("userLabel").textContent = currentUser.name;
+
+    if (currentUser.role === "admin") {
+        document.getElementById("adminPage").classList.remove("hidden");
+        document.getElementById("customerPage").classList.add("hidden");
+
+        document.getElementById("adminMonth").value = monthNow();
+        renderAdmin();
+    } else {
+        document.getElementById("customerPage").classList.remove("hidden");
+        document.getElementById("adminPage").classList.add("hidden");
+
+        document.getElementById("customerWelcome").textContent =
+            "Welcome, " + currentUser.name;
+
+        document.getElementById("customerMonth").value = monthNow();
+        renderCustomer();
+    }
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem("mmh_session");
+
+    document.getElementById("adminPage").classList.add("hidden");
+    document.getElementById("customerPage").classList.add("hidden");
+    document.getElementById("logoutBtn").classList.add("hidden");
+    document.getElementById("userLabel").textContent = "";
+
+    document.getElementById("loginPassword").value = "";
+    showLogin();
+}
+
+function addMealType() {
+    const name = document.getElementById("mealName").value.trim();
+    const price = Number(document.getElementById("mealPrice").value);
+
+    if (!name || price <= 0) {
+        alert("Enter meal name and valid price");
+        return;
+    }
+
+    mealTypes.push({
+        id: Date.now(),
+        name,
+        price
+    });
+
+    saveData();
+    renderAdmin();
+
+    document.getElementById("mealName").value = "";
+    document.getElementById("mealPrice").value = "";
+}
+
+function deleteMealType(id) {
+    if (!confirm("Delete this meal type?")) return;
+
+    mealTypes = mealTypes.filter(m => m.id !== id);
+    saveData();
+    renderAdmin();
+}
+
+function renderMealTypes() {
+    const tbody = document.getElementById("mealTypeTable");
+
+    tbody.innerHTML = mealTypes.map(m => `
+        <tr>
+            <td>${m.name}</td>
+            <td>${money(m.price)}</td>
+            <td>
+                <button class="danger" onclick="deleteMealType(${m.id})">
+                    Delete
+                </button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+function renderDropdowns() {
+    const options = mealTypes.map(m => `
+        <option value="${m.id}">
+            ${m.name} - ${money(m.price)}
+        </option>
+    `).join("");
+
+    document.getElementById("adminMeal").innerHTML = options;
+    document.getElementById("customerMeal").innerHTML = options;
+
+    document.getElementById("adminCustomer").innerHTML =
+        users.map(u => `
+            <option value="${u.id}">
+                ${u.name} (${u.mobile})
+            </option>
+        `).join("");
+}
+
+function getUserMeals(userId, month) {
+    return meals.filter(
+        m => m.userId === userId && m.date.startsWith(month)
+    );
+}
+
+function getBill(userId, month) {
+    return getUserMeals(userId, month)
+        .reduce((sum, m) => sum + m.total, 0);
+}
+
+function getPaid(userId, month) {
+    return payments
+        .filter(p => p.userId === userId && p.month === month)
+        .reduce((sum, p) => sum + p.amount, 0);
+}
+
+function addMealRecord(userId, mealId, date, quantity) {
+    const meal = mealTypes.find(m => m.id === mealId);
+
+    if (!meal || !date || !userId) {
+        alert("Select customer, meal and date");
+        return;
+    }
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+        alert("Enter valid quantity");
+        return;
+    }
+
+    if (date > today()) {
+        alert("Future date not allowed");
+        return;
+    }
+
+    const rate = Number(meal.price);
+    const total = rate * quantity;
+
+    meals.push({
+        id: Date.now(),
+        userId,
+        mealName: meal.name,
+        quantity,
+        rate,
+        total,
+        date
+    });
+
+    saveData();
+
+    if (currentUser.role === "admin") {
+        renderAdmin();
+    } else {
+        renderCustomer();
+    }
+
+    alert(meal.name + " × " + quantity + " = " + money(total));
+}
+
+function adminAddMeal() {
+    const userId = Number(document.getElementById("adminCustomer").value);
+    const mealId = Number(document.getElementById("adminMeal").value);
+    const date = document.getElementById("adminDate").value;
+    const quantity = Number(document.getElementById("adminQty").value);
+
+    addMealRecord(userId, mealId, date, quantity);
+}
+
+function customerAddMeal() {
+    const mealId = Number(document.getElementById("customerMeal").value);
+    const date = document.getElementById("customerDate").value;
+    const quantity = Number(document.getElementById("customerQty").value);
+
+    addMealRecord(currentUser.id, mealId, date, quantity);
+}
+
+function recordPayment(userId, month, due) {
+    if (due <= 0) {
+        alert("No due amount");
+        return;
+    }
+
+    const amount = Number(
+        prompt("Enter payment amount. Due: " + money(due), due)
+    );
+
+    if (!amount || amount <= 0) {
+        alert("Invalid payment amount");
+        return;
+    }
+
+    payments.push({
+        id: Date.now(),
+        userId,
+        month,
+        amount,
+        date: today()
+    });
+
+    saveData();
+    renderAdmin();
+}
+
+function deleteMeal(id) {
+    if (!confirm("Delete this meal record?")) return;
+
+    meals = meals.filter(m => m.id !== id);
+    saveData();
+    renderAdmin();
+}
+
+function renderAdmin() {
+    const month = document.getElementById("adminMonth").value || monthNow();
+
+    document.getElementById("totalCustomers").textContent = users.length;
+
+    const monthlyMeals = meals.filter(m => m.date.startsWith(month));
+
+    document.getElementById("totalMeals").textContent =
+        monthlyMeals.reduce((sum, m) => sum + m.quantity, 0);
+
+    let billTotal = 0;
+    let dueTotal = 0;
+
+    users.forEach(u => {
+        const bill = getBill(u.id, month);
+        const paid = getPaid(u.id, month);
+
+        billTotal += bill;
+        dueTotal += Math.max(0, bill - paid);
+    });
+
+    document.getElementById("totalBill").textContent = money(billTotal);
+    document.getElementById("totalDue").textContent = money(dueTotal);
+
+    renderMealTypes();
+    renderDropdowns();
+    renderCustomerTable(month);
+    renderAllMeals();
+}
+
+function renderCustomerTable(month) {
+    const tbody = document.getElementById("customerTable");
+
+    tbody.innerHTML = users.map(u => {
+        const userMeals = getUserMeals(u.id, month);
+        const bill = getBill(u.id, month);
+        const paid = getPaid(u.id, month);
+        const due = Math.max(0, bill - paid);
+
+        const count = userMeals.reduce(
+            (sum, m) => sum + m.quantity, 0
+        );
+
+        return `
+            <tr>
+                <td>${u.name}</td>
+                <td>${u.mobile}</td>
+                <td>${count}</td>
+                <td>${money(bill)}</td>
+                <td>${money(paid)}</td>
+                <td>${money(due)}</td>
+                <td>
+                    <button onclick="recordPayment(${u.id}, '${month}', ${due})">
+                        Payment
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function renderAllMeals() {
+    const tbody = document.getElementById("allMealsTable");
+
+    tbody.innerHTML = meals.slice().reverse().map(m => {
+        const user = users.find(u => u.id === m.userId);
+
+        return `
+            <tr>
+                <td>${user ? user.name : "Customer"}</td>
+                <td>${m.date}</td>
+                <td>${m.mealName}</td>
+                <td>${m.quantity}</td>
+                <td>${money(m.rate)}</td>
+                <td>${money(m.total)}</td>
+                <td>
+                    <button class="danger" onclick="deleteMeal(${m.id})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function renderCustomer() {
+    const month = document.getElementById("customerMonth").value || monthNow();
+
+    const myMeals = getUserMeals(currentUser.id, month);
+    const bill = getBill(currentUser.id, month);
+    const paid = getPaid(currentUser.id, month);
+    const due = Math.max(0, bill - paid);
+
+    document.getElementById("myMealsCount").textContent =
+        myMeals.reduce((sum, m) => sum + m.quantity, 0);
+
+    document.getElementById("myBill").textContent = money(bill);
+    document.getElementById("myPaid").textContent = money(paid);
+    document.getElementById("myDue").textContent = money(due);
+
+    document.getElementById("myMealsTable").innerHTML =
+        myMeals.slice().reverse().map(m => `
+            <tr>
+                <td>${m.date}</td>
+                <td>${m.mealName}</td>
+                <td>${m.quantity}</td>
+                <td>${money(m.rate)}</td>
+                <td>${money(m.total)}</td>
+            </tr>
+        `).join("");
+
+    renderDropdowns();
+}
+
+/* Live price preview */
+function updateAdminPreview() {
+    const mealId = Number(document.getElementById("adminMeal").value);
+    const quantity = Number(document.getElementById("adminQty").value);
+    const meal = mealTypes.find(m => m.id === mealId);
+
+    const total = meal ? meal.price * quantity : 0;
+
+    document.getElementById("adminPricePreview").textContent =
+        "Total: " + money(total);
+}
+
+function updateCustomerPreview() {
+    const mealId = Number(document.getElementById("customerMeal").value);
+    const quantity = Number(document.getElementById("customerQty").value);
+    const meal = mealTypes.find(m => m.id === mealId);
+
+    const total = meal ? meal.price * quantity : 0;
+
+    document.getElementById("customerPricePreview").textContent =
+        "Total: " + money(total);
+}
+
+document.getElementById("adminMeal").addEventListener("change", updateAdminPreview);
+document.getElementById("adminQty").addEventListener("input", updateAdminPreview);
+
+document.getElementById("customerMeal").addEventListener("change", updateCustomerPreview);
+document.getElementById("customerQty").addEventListener("input", updateCustomerPreview);
+
+document.getElementById("adminDate").value = today();
+document.getElementById("customerDate").value = today();
+
+document.getElementById("adminMonth").value = monthNow();
+document.getElementById("customerMonth").value = monthNow();
+
+renderDropdowns();
+updateAdminPreview();
+updateCustomerPreview();
+
+// If a valid session exists, open the correct dashboard after page refresh.
+if (currentUser) {
+    openDashboard();
+}
+</script>
+
+</body>
+</html>
