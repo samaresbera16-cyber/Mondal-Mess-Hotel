@@ -1,0 +1,27 @@
+import {Router} from "express";
+import MealType from "../models/MealType.js";
+import User from "../models/User.js";
+import MealRecord from "../models/MealRecord.js";
+import Payment from "../models/Payment.js";
+import Invoice from "../models/Invoice.js";
+import {protect,adminOnly} from "../middleware/auth.js";
+import {calculateBill,generateInvoice} from "../utils/billing.js";
+const router=Router();router.use(protect,adminOnly);
+router.get("/dashboard",async(req,res,next)=>{try{
+ const month=req.query.month||new Date().toISOString().slice(0,7);const [y,m]=month.split("-").map(Number);const start=new Date(y,m-1,1),end=new Date(y,m,1);
+ const users=await User.countDocuments({role:"user"}),activeUsers=await User.countDocuments({role:"user",accountStatus:"active"});
+ const meals=await MealRecord.find({mealDate:{$gte:start,$lt:end},status:{$ne:"cancelled"}});
+ const payments=await Payment.find({billingMonth:month,status:"valid"});
+ res.json({month,totalUsers:users,activeUsers,totalMeals:meals.length,mealRevenue:meals.reduce((s,x)=>s+x.mealPriceSnapshot,0),collected:payments.reduce((s,x)=>s+x.amount,0)});
+}catch(e){next(e)}});
+router.get("/users",async(req,res,next)=>{try{const q=req.query.q;const filter={role:"user"};if(q)filter.$or=[{name:new RegExp(q,"i")},{mobile:new RegExp(q)}];res.json(await User.find(filter).select("-password").sort({createdAt:-1}))}catch(e){next(e)}});
+router.patch("/users/:id/status",async(req,res,next)=>{try{const {accountStatus}=req.body;if(!["active","inactive","pending"].includes(accountStatus))return res.status(400).json({message:"Invalid status"});const u=await User.findByIdAndUpdate(req.params.id,{accountStatus},{new:true}).select("-password");if(!u)return res.status(404).json({message:"User not found"});res.json(u)}catch(e){next(e)}});
+router.get("/meal-types",async(req,res,next)=>{try{res.json(await MealType.find().sort({name:1}))}catch(e){next(e)}});
+router.post("/meal-types",async(req,res,next)=>{try{const {name,currentPrice,description}=req.body;if(!name||currentPrice===undefined||Number(currentPrice)<0)return res.status(400).json({message:"Valid name and price required"});res.status(201).json(await MealType.create({name,currentPrice:Number(currentPrice),description}))}catch(e){if(e.code===11000)return res.status(409).json({message:"Meal type already exists"});next(e)}});
+router.patch("/meal-types/:id",async(req,res,next)=>{try{const update={};if(req.body.name!==undefined)update.name=req.body.name;if(req.body.currentPrice!==undefined){if(Number(req.body.currentPrice)<0)return res.status(400).json({message:"Price cannot be negative"});update.currentPrice=Number(req.body.currentPrice)}if(req.body.isActive!==undefined)update.isActive=!!req.body.isActive;const item=await MealType.findByIdAndUpdate(req.params.id,update,{new:true,runValidators:true});if(!item)return res.status(404).json({message:"Meal type not found"});res.json(item)}catch(e){next(e)}});
+router.get("/payments",async(req,res,next)=>{try{const filter={status:"valid"};if(req.query.month)filter.billingMonth=req.query.month;res.json(await Payment.find(filter).populate("userId","name mobile").sort({paymentDate:-1}).limit(500))}catch(e){next(e)}});
+router.post("/payments",async(req,res,next)=>{try{const {userId,billingMonth,amount,paymentDate,paymentMethod,transactionReference,notes}=req.body;if(!userId||!/^\d{4}-\d{2}$/.test(billingMonth)||Number(amount)<=0)return res.status(400).json({message:"User, month and positive amount required"});const user=await User.findById(userId);if(!user)return res.status(404).json({message:"User not found"});const p=await Payment.create({userId,billingMonth,amount:Number(amount),paymentDate:paymentDate||new Date(),paymentMethod,transactionReference,notes,recordedBy:req.user._id});res.status(201).json(p)}catch(e){next(e)}});
+router.get("/billing/:userId/:month",async(req,res,next)=>{try{res.json(await calculateBill(req.params.userId,req.params.month))}catch(e){next(e)}});
+router.post("/invoices/generate",async(req,res,next)=>{try{const {userId,month}=req.body;if(!userId||!month)return res.status(400).json({message:"User and month required"});res.json(await generateInvoice(userId,month))}catch(e){next(e)}});
+router.get("/invoices",async(req,res,next)=>{try{const filter={};if(req.query.month)filter.billingMonth=req.query.month;res.json(await Invoice.find(filter).populate("userId","name mobile").sort({generatedAt:-1}))}catch(e){next(e)}});
+export default router;

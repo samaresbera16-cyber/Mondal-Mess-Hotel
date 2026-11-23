@@ -1,0 +1,12 @@
+import {Router} from "express";
+import {protect} from "../middleware/auth.js";
+import {calculateBill} from "../utils/billing.js";
+import MealRecord from "../models/MealRecord.js";
+import Payment from "../models/Payment.js";
+import Invoice from "../models/Invoice.js";
+const router=Router();router.use(protect);
+router.get("/dashboard",async(req,res,next)=>{try{const month=req.query.month||new Date().toISOString().slice(0,7);const bill=await calculateBill(req.user._id,month);const meals=await MealRecord.find({userId:req.user._id,status:{$ne:"cancelled"}}).sort({mealDate:-1}).limit(8);const payments=await Payment.find({userId:req.user._id,status:"valid"}).sort({paymentDate:-1}).limit(5);res.json({month,bill,meals,payments})}catch(e){next(e)}});
+router.get("/billing/:month",async(req,res,next)=>{try{res.json(await calculateBill(req.user._id,req.params.month))}catch(e){next(e)}});
+router.get("/payments",async(req,res,next)=>{try{res.json(await Payment.find({userId:req.user._id,status:"valid"}).sort({paymentDate:-1}))}catch(e){next(e)}});
+router.get("/invoices",async(req,res,next)=>{try{res.json(await Invoice.find({userId:req.user._id}).sort({billingMonth:-1}))}catch(e){next(e)}});
+export default router;
